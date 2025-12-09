@@ -6,6 +6,7 @@ from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # --- CONFIGURAÇÕES ---
 DATASET_DIR = 'dataset_lixo'  

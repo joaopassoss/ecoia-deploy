@@ -4,7 +4,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 import numpy as np
 import os
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # --- CONFIGURAÇÃO ---
 MODEL_PATH = 'meu_modelo_ecoia.h5' # Deve ter o mesmo nome gerado no treino
 CONFIDENCE_THRESHOLD = 0.70        # Confiança mínima (70%)

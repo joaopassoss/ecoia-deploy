@@ -1,4 +1,5 @@
 import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 from flask import Flask, render_template, request, jsonify
 from ai_manager import EcoBrain  # Importa nossa classe de IA
 
