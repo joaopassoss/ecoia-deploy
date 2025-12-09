@@ -1,0 +1,8 @@
+flask
+tensorflow
+pillow
+numpy
+scipy
+pyopenssl
+gunicorn
+google-generativeai

@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#198754">
+    <title>EcoIA - Identificador de Resíduos</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #198754;
+            --primary-dark: #146c43;
+            --accent-color: #20c997;
+            --bg-color: #f0f2f5;
+            --card-radius: 24px;
+            --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            color: #2d3436;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: white;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header-eco {
+            background: white;
+            padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+
+        .brand-text {
+            font-weight: 700;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .btn-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            border: none;
+            background: #f1f3f5;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-icon:active {
+            transform: scale(0.95);
+            background: #e9ecef;
+        }
+
+        /* CONTEÚDO */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+            /* Permite scroll no conteúdo */
+        }
+
+        .screen-section {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .screen-section.active {
+            display: flex;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* TELA INICIAL */
+        .welcome-card {
+            background: linear-gradient(135deg, #e6fcf5 0%, #f2fcf9 100%);
+            border-radius: var(--card-radius);
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(25, 135, 84, 0.1);
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: auto;
+        }
+
+        .btn-action-card {
+            border: none;
+            border-radius: 20px;
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            position: relative;
+        }
+
+        .btn-camera-start {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-gallery {
+            background: white;
+            color: var(--primary-color);
+            border: 2px solid #f1f3f5;
+        }
+
+        .btn-action-card:active {
+            transform: scale(0.98);
+        }
+
+        #fileInput {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        /* TELA CÂMERA */
+        .camera-full-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: black;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #videoElement {
+            flex: 1;
+            width: 100%;
+            object-fit: cover;
+        }
+
+        .camera-controls {
+            height: 120px;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-shutter {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 4px solid white;
+            background: transparent;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-shutter-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .btn-shutter:active .btn-shutter-inner {
+            transform: scale(0.9);
+            background: #ddd;
+        }
+
+        .btn-close-camera {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 210;
+        }
+
+        /* TELA RESULTADO */
+        .result-preview-container {
+            width: 100%;
+            height: 250px;
+            border-radius: var(--card-radius);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            background: #f8f9fa;
+        }
+
+        #previewImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid #f1f3f5;
+        }
+
+        .confidence-badge {
+            background: #2d3436;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* TELA HISTÓRICO (NOVO) */
+        .history-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-back-history {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: none;
+            background: #f1f3f5;
+            color: #333;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .history-list-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 20px;
+        }
+
+        .history-item {
+            border: 1px solid #f1f3f5;
+            border-left: 4px solid transparent;
+            margin-bottom: 12px;
+            border-radius: 16px;
+            background: white;
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .history-item:active {
+            transform: scale(0.98);
+            background-color: #f8f9fa;
+        }
+
+        .history-thumb {
+            width: 60px;
+            height: 60px;
+            min-width: 60px;
+            border-radius: 12px;
+            object-fit: cover;
+            margin-right: 15px;
+            background-color: #e9ecef;
+        }
+
+        .history-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .history-arrow {
+            color: #dee2e6;
+            font-size: 1.2rem;
+            margin-left: 10px;
+        }
+
+        /* LOADING */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 300;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner-ai {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            animation: pulse-ai 1.5s infinite ease-in-out;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes pulse-ai {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.8;
+            }
+        }
+
+        #errorAlert {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            background: #fff0f3;
+            color: #c92a2a;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            text-align: center;
+            border: 1px solid #ffc9c9;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="errorAlert"></div>
+
+    <div class="app-container">
+
+        <!-- Header (Visível nas telas principais) -->
+        <header class="header-eco" id="mainHeader">
+            <h1 class="brand-text"><i class="fas fa-leaf me-2"></i>EcoIA</h1>
+            <button class="btn-icon" id="btnOpenHistory" title="Histórico">
+                <i class="fas fa-history"></i>
+            </button>
+        </header>
+
+        <main class="main-content">
+
+            <!-- TELA 1: INICIAL -->
+            <div id="screenStart" class="screen-section active">
+                <div class="welcome-card mt-4">
+                    <i class="fas fa-magic"
+                        style="font-size: 4rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <h2 style="font-weight: 700; font-size: 1.5rem;">Olá!</h2>
+                    <p class="text-muted" style="font-size: 0.95rem;">Use nossa IA Generativa para aprender a descartar
+                        corretamente.</p>
+                </div>
+
+                <div class="action-grid">
+                    <button id="btnStartCamera" class="btn-action-card btn-camera-start">
+                        <i class="fas fa-camera fa-2x mb-1"></i>
+                        <span>Escanear</span>
+                    </button>
+
+                    <button id="btnUpload" class="btn-action-card btn-gallery">
+                        <i class="fas fa-images fa-2x mb-1 text-secondary"></i>
+                        <span class="text-secondary">Galeria</span>
+                    </button>
+
+                    <div class="text-center w-100 text-muted mt-2" style="grid-column: span 2; font-size: 0.8rem;">
+                        Powered by Google Gemini
+                    </div>
+
+                    <input type="file" id="fileInput" accept="image/*">
+                </div>
+            </div>
+
+            <!-- TELA 2: CÂMERA -->
+            <div id="screenCamera" class="screen-section">
+                <div class="camera-full-container">
+                    <button class="btn-close-camera" id="btnCloseCamera">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <video id="videoElement" autoplay playsinline></video>
+                    <div class="camera-controls">
+                        <button id="btnCapture" class="btn-shutter">
+                            <div class="btn-shutter-inner"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA 3: RESULTADO -->
+            <div id="screenResult" class="screen-section">
+                <div class="result-preview-container">
+                    <img id="previewImage" src="" alt="Preview">
+                    <div style="position: absolute; bottom: 10px; right: 10px;">
+                        <span id="resConfidence" class="confidence-badge">--%</span>
+                    </div>
+                </div>
+
+                <div class="result-card" id="resultCard">
+                    <h5 class="text-muted text-uppercase small fw-bold mb-2">A IA Identificou:</h5>
+                    <h3 id="resTitle" class="fw-bold mb-3" style="color: var(--primary-color);">...</h3>
+
+                    <div class="p-3 rounded-3 mb-3" style="background-color: #f8f9fa;">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-sparkles me-2 text-warning"></i>
+                            <span class="fw-bold text-dark">Dica da IA:</span>
+                        </div>
+                        <p id="resDesc" class="mb-0 text-secondary" style="line-height: 1.6; font-size: 0.9rem;">...</p>
+                    </div>
+
+                    <!-- Botão Voltar para Histórico ou Nova Consulta -->
+                    <div class="d-flex gap-2 mt-auto">
+                        <button id="btnBackToHistoryFromRes"
+                            class="btn btn-outline-secondary w-100 py-3 rounded-pill fw-bold shadow-sm d-none">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
+                        <button id="btnNewScan" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow-sm">
+                            <i class="fas fa-camera me-2"></i> Novo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA 4: HISTÓRICO (NOVO) -->
+            <div id="screenHistory" class="screen-section">
+                <div class="history-header">
+                    <button id="btnCloseHistory" class="btn-back-history">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h4 class="fw-bold mb-0">Histórico</h4>
+                    <button id="btnClearHistory" class="btn btn-sm text-danger ms-auto fw-bold"
+                        style="background: none; border: none;">
+                        Limpar
+                    </button>
+                </div>
+
+                <div id="historyList" class="history-list-container">
+                    <!-- Itens serão gerados aqui -->
+                </div>
+
+                <div class="text-center mt-5" id="emptyHistory" style="display: none;">
+                    <i class="fas fa-history fa-4x text-light mb-3" style="color: #e9ecef !important;"></i>
+                    <p class="text-muted">Nenhum histórico recente</p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Loading -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="spinner-ai"></div>
+            <h5 class="fw-bold text-secondary">Consultando IA...</h5>
+        </div>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        if (typeof jQuery == 'undefined') {
+            document.getElementById('errorAlert').innerHTML = '⚠️ Erro: Falha ao carregar scripts. Verifique a internet.';
+            document.getElementById('errorAlert').style.display = 'block';
+        }
+
+        $(document).ready(function () {
+            const video = document.getElementById('videoElement');
+            const canvas = document.createElement('canvas');
+            let stream = null;
+            let currentImageBlob = null;
+
+            function showError(msg) {
+                $('#errorAlert').html(msg).fadeIn().delay(5000).fadeOut();
+            }
+
+            // --- SISTEMA DE NAVEGAÇÃO ENTRE TELAS ---
+            function showScreen(screenId) {
+                // Esconde todas as telas
+                $('.screen-section').removeClass('active').hide();
+
+                // Mostra a tela desejada com animação
+                $('#' + screenId).css('display', 'flex').hide().fadeIn(200).addClass('active');
+
+                // Lógica do Header (Esconder em telas cheias)
+                if (screenId === 'screenCamera' || screenId === 'screenHistory') {
+                    $('#mainHeader').slideUp();
+                } else {
+                    $('#mainHeader').slideDown();
+                    stopCamera();
+                }
+
+                // Reseta botões do resultado
+                if (screenId === 'screenStart') {
+                    $('#btnBackToHistoryFromRes').addClass('d-none');
+                }
+            }
+
+            async function startCamera() {
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    showError("⚠️ Acesso negado. Use 'Galeria' ou ative HTTPS.");
+                    return;
+                }
+                try {
+                    $('#loadingOverlay').fadeIn();
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+                    });
+                    video.srcObject = stream;
+                    video.play();
+                    $('#loadingOverlay').fadeOut();
+                    showScreen('screenCamera');
+                } catch (err) {
+                    $('#loadingOverlay').fadeOut();
+                    showError("Erro na câmera. Use a Galeria.");
+                }
+            }
+
+            function stopCamera() {
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                }
+            }
+
+            // --- BOTÕES E FLUXO PRINCIPAL ---
+
+            $('#btnStartCamera').on('click touchstart', function (e) {
+                if (e.type == 'touchstart') $(this).off('click');
+                startCamera();
+            });
+
+            $('#btnUpload').on('click touchstart', function (e) {
+                if (e.type == 'touchstart') $(this).off('click');
+                $('#fileInput').trigger('click');
+            });
+
+            $('#fileInput').change(function (e) {
+                const file = e.target.files[0];
+                if (file) processFile(file);
+            });
+
+            $('#btnCloseCamera').click(function () { showScreen('screenStart'); });
+
+            $('#btnCapture').click(function () {
+                if (!stream) return;
+                $('.camera-full-container').fadeOut(50).fadeIn(50);
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                canvas.toBlob(function (blob) { processFile(blob); }, 'image/jpeg', 0.9);
+            });
+
+            $('#btnNewScan').click(function () {
+                showScreen('screenStart');
+                $('#fileInput').val('');
+            });
+
+            // Botão voltar do resultado (se veio do histórico)
+            $('#btnBackToHistoryFromRes').click(function () {
+                showScreen('screenHistory');
+            });
+
+            function processFile(blob) {
+                currentImageBlob = blob;
+                const url = URL.createObjectURL(blob);
+                $('#previewImage').attr('src', url);
+                sendToPython();
+            }
+
+            function sendToPython() {
+                $('#loadingOverlay').fadeIn();
+                var formData = new FormData();
+                formData.append('file', currentImageBlob, 'image.jpg');
+
+                $.ajax({
+                    url: '/predict',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) { showResult(response, true); },
+                    error: function (err) {
+                        showError("Erro de conexão com o servidor.");
+                        $('#loadingOverlay').fadeOut();
+                        showScreen('screenStart');
+                    }
+                });
+            }
+
+            // Função unificada para mostrar resultado
+            // save: booleano, se true salva no histórico (novo scan), se false apenas exibe (visualização)
+            function showResult(data, save) {
+                $('#loadingOverlay').fadeOut();
+                showScreen('screenResult');
+
+                $('#resTitle').text(data.label);
+                $('#resConfidence').text(data.conf);
+                $('#resDesc').text(data.desc);
+
+                let colorHex = "#6c757d";
+                const c = (data.color_code || "").toLowerCase();
+                if (c.includes("vermelha")) colorHex = "#dc3545";
+                else if (c.includes("azul")) colorHex = "#0d6efd";
+                else if (c.includes("verde")) colorHex = "#198754";
+                else if (c.includes("amarela")) colorHex = "#ffc107";
+                else if (c.includes("marrom")) colorHex = "#8B4513";
+                else if (c.includes("laranja")) colorHex = "#fd7e14";
+
+                $('#resTitle').css('color', colorHex);
+                $('#resultCard').css('border-top', `5px solid ${colorHex}`);
+
+                if (save) {
+                    saveToHistory({
+                        label: data.label,
+                        desc: data.desc,
+                        conf: data.conf, // Salva confiança
+                        color: colorHex,
+                        color_code: data.color_code, // Salva código original
+                        date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    });
+                    $('#btnBackToHistoryFromRes').addClass('d-none');
+                }
+            }
+
+            // --- SISTEMA DE HISTÓRICO ---
+
+            // Abre a tela
+            $('#btnOpenHistory').click(function () {
+                updateHistoryUI();
+                showScreen('screenHistory');
+            });
+
+            // Fecha a tela (volta pro início)
+            $('#btnCloseHistory').click(function () {
+                showScreen('screenStart');
+            });
+
+            function updateHistoryUI() {
+                const history = JSON.parse(localStorage.getItem('ecoia_history') || '[]');
+                const list = $('#historyList');
+                list.empty();
+
+                if (history.length > 0) {
+                    $('#emptyHistory').hide();
+                    history.forEach((item, index) => {
+                        const thumbSrc = item.thumb || 'https://via.placeholder.com/60?text=Eco';
+
+                        // Cria o elemento HTML do item
+                        const itemHtml = $(`
+                        <div class="history-item" style="border-left-color: ${item.color} !important;">
+                            <img src="${thumbSrc}" class="history-thumb">
+                            <div class="history-info">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1 fw-bold text-truncate">${item.label}</h6>
+                                    <small class="text-muted ms-2">${item.date}</small>
+                                </div>
+                                <small class="text-muted text-truncate d-block">${item.desc}</small>
+                            </div>
+                            <i class="fas fa-chevron-right history-arrow"></i>
+                        </div>
+                    `);
+
+                        // Adiciona evento de clique para abrir detalhes
+                        itemHtml.click(function () {
+                            // Preenche tela de resultado com dados salvos
+                            $('#previewImage').attr('src', thumbSrc);
+                            showResult(item, false); // false = não salvar de novo
+
+                            // Mostra botão de voltar específico
+                            $('#btnBackToHistoryFromRes').removeClass('d-none');
+                        });
+
+                        list.append(itemHtml);
+                    });
+                } else {
+                    $('#emptyHistory').show();
+                }
+            }
+
+            function saveToHistory(item) {
+                // Gera thumbnail
+                const img = document.getElementById('previewImage');
+                const thumbCanvas = document.createElement('canvas');
+                const ctx = thumbCanvas.getContext('2d');
+                // Salva um pouco maior para servir de preview na tela de detalhes
+                thumbCanvas.width = 300;
+                thumbCanvas.height = 300;
+                ctx.drawImage(img, 0, 0, 300, 300);
+                item.thumb = thumbCanvas.toDataURL('image/jpeg', 0.7);
+
+                const history = JSON.parse(localStorage.getItem('ecoia_history') || '[]');
+                history.unshift(item);
+                if (history.length > 20) history.pop(); // Aumentei limite para 20
+                localStorage.setItem('ecoia_history', JSON.stringify(history));
+            }
+
+            $('#btnClearHistory').click(function () {
+                if (confirm("Apagar todo o histórico?")) {
+                    localStorage.removeItem('ecoia_history');
+                    updateHistoryUI();
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>
