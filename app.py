@@ -1,5 +1,7 @@
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["JAX_PLATFORM_NAME"] = "cpu"
 from flask import Flask, render_template, request, jsonify
 from ai_manager import EcoBrain  # Importa nossa classe de IA
 

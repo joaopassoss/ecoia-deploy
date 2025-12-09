@@ -1,9 +1,10 @@
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 # Desativa logs chatos do TensorFlow
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
+os.environ["JAX_PLATFORM_NAME"] = "cpu"
 import tensorflow as tf
 tf.config.set_visible_devices([], "GPU")
 from tensorflow.keras.models import load_model
