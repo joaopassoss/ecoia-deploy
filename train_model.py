@@ -1,14 +1,10 @@
-import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-os.environ["JAX_PLATFORM_NAME"] = "cpu"
 import tensorflow as tf
-tf.config.set_visible_devices([], "GPU")
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.layers import Dense, GlobalAveragePooling2D, Dropout
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
+import os
 
 # --- CONFIGURAÇÕES ---
 DATASET_DIR = 'dataset_lixo'  
